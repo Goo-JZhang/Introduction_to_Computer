@@ -1,0 +1,174 @@
+enum Decision g00_highImitatoradj(int len,
+	int my_id,
+	const char* my_decisions,
+	int opp_id,
+	const char* opp_decisions,
+	const char opp_history_decisions[HISTORY_LENGTH][MAX_TURN],
+	const char opp_opp_history_decisions[HISTORY_LENGTH][MAX_TURN])
+{
+	int ave = 0;
+	int i = 0, j = 0;
+	int isImi = -1;
+	int numImi = 0;
+	int turn = 20;
+	int Bopp[20], Boop[20];
+	int Baveopp;
+	for (i = 0; i <= 19; i++)
+	{
+			int j = 0;
+			Bopp[i] = 0;
+			Boop[i] = 0;
+			bool flag = false;
+			if (opp_history_decisions[i][0] == 'm')
+			{
+				flag = false;
+			}
+			else
+			{
+				for (j = 0; j <= 24; j++)
+				{
+					if (opp_history_decisions[i][j] == 'b')
+					{
+						Bopp[i]++;
+					}
+					if (opp_opp_history_decisions[i][j] == 'b')
+					{
+						Boop[i]++;
+					}
+				}
+				flag = true;
+			}
+		if (flag == false)
+		{
+			Bopp[i] = -1;
+			Boop[i] = -1;
+			turn--;
+		}
+		else NULL;
+	}
+	for (i = 0; i <= 19; i++)
+	{
+		ave = ave + Bopp[i];
+	}
+	Baveopp = (turn == 0) ? 0 : (ave / turn);
+	int count = 0;
+	int allcount = 20;
+	for (i = 0; i <= 19; i++)
+	{
+		if (Boop[i] >= 10)
+		{
+			count++;
+		}
+		else if (Boop[i] == -1)
+		{
+			allcount--;
+		}
+		else NULL;
+	}
+	int threshold = 0;
+	if (count >= allcount / 2)
+	{
+		threshold = 18;
+	}
+	else
+	{
+		threshold = 12;
+	}
+if (Baveopp >= threshold)
+{
+	bool find = false;
+	//若对方有对战记录，找到对手历史对战中得分最低的一轮，模仿他的对手
+	int min_score = INT_MAX;
+	int min_decision_idx = 0;
+	for (int i = 0; i < HISTORY_LENGTH; i++)
+	{
+		int score = 0;
+		for (int j = 0; j < MAX_TURN; j++)
+		{
+			if (opp_history_decisions[i][j] == COOPERATION && opp_opp_history_decisions[i][j] == COOPERATION)
+			{
+				score += 3;
+			}
+			else if (opp_history_decisions[i][j] == COOPERATION && opp_opp_history_decisions[i][j] == BETRAYAL)
+			{
+				score -= 1;
+			}
+			else if (opp_history_decisions[i][j] == BETRAYAL && opp_opp_history_decisions[i][j] == COOPERATION)
+			{
+				score += 5;
+			}
+			else
+			{
+				score -= 3;
+			}
+		}
+		if (score < min_score)
+		{
+			min_score = score;
+			min_decision_idx = i;
+			find = true;
+		}
+	}
+	if (find)
+	{
+		if (opp_opp_history_decisions[min_decision_idx][len] == 'c')
+			return COOPERATION;
+		else
+			return BETRAYAL;
+	}
+	// 若对方无对战纪录 则无脑选择合作
+	else
+	{
+		return COOPERATION;
+	}
+}
+else
+{
+	//
+	bool find = false;
+	//若对方有对战记录，找到对手历史对战中得分最低的一轮，模仿他的对手
+	int max_score = -INT_MAX;
+	int max_decision_idx = 0;
+	for (int i = 0; i < HISTORY_LENGTH; i++)
+	{
+		int score = 0;
+		for (int j = 0; j < MAX_TURN; j++)
+		{
+			if (opp_history_decisions[i][j] == COOPERATION && opp_opp_history_decisions[i][j] == COOPERATION)
+			{
+				score += 3;
+			}
+			else if (opp_history_decisions[i][j] == COOPERATION && opp_opp_history_decisions[i][j] == BETRAYAL)
+			{
+				score += 5;
+			}
+			else if (opp_history_decisions[i][j] == BETRAYAL && opp_opp_history_decisions[i][j] == COOPERATION)
+			{
+				score -= 1;
+			}
+			else
+			{
+				score -= 3;
+			}
+		}
+		if (score > max_score)
+		{
+			max_score = score;
+			max_decision_idx = i;
+			find = true;
+		}
+	}
+	if (find)
+	{
+		if (opp_opp_history_decisions[max_decision_idx][len] == 'c')
+			return COOPERATION;
+		else
+			return BETRAYAL;
+	}
+	// 若对方无对战纪录 则无脑选择合作
+	else
+	{
+		return COOPERATION;
+	}
+}
+}
